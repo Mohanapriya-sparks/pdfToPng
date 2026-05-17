@@ -38,14 +38,25 @@ export const useFileUpload = (validateFile) => {
     [previewUrl],
   );
 
-  const processFile = useCallback(
+const processFile = useCallback(
     async (selectedFile) => {
       if (!selectedFile) return;
+
+      // 1. From 'main': 10MB file size limit check
+      const MAX_SIZE = 10 * 1024 * 1024;
+      if (selectedFile.size > MAX_SIZE) {
+        setStatusMessage("Error: File size exceeds 10MB limit");
+        setTimeout(() => setStatusMessage(""), 5000);
+        return;
+      }
+
+      // 2. From 'feat/pdf-preview': Async validation
       const validation = await validateFile(selectedFile);
+
       if (validation.isValid) {
         setFile(selectedFile);
 
-        // Images: create object URL preview immediately.
+        // 3. From 'feat/pdf-preview': Image and PDF preview logic
         if (selectedFile.type.startsWith("image/")) {
           if (previewUrl) URL.revokeObjectURL(previewUrl);
           const url = URL.createObjectURL(selectedFile);
@@ -54,7 +65,7 @@ export const useFileUpload = (validateFile) => {
             validation.message || `File "${selectedFile.name}" selected`,
           );
         } else if (selectedFile.type === "application/pdf") {
-          // PDFs: use object URL preview (keep original embed appearance). Simple and fast.
+          // PDFs: use object URL preview
           if (previewUrl) URL.revokeObjectURL(previewUrl);
           const url = URL.createObjectURL(selectedFile);
           setPreviewUrl(url);
@@ -68,6 +79,7 @@ export const useFileUpload = (validateFile) => {
           );
         }
       } else {
+        // 4. From 'main': Error message timeout for invalid files
         setStatusMessage(validation.message || "Error: Invalid file type");
         setTimeout(() => setStatusMessage(""), 3000);
       }
