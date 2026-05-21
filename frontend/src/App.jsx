@@ -13,7 +13,6 @@ import ImageResize from "./pages/ImageResize";
 import ImageUpscale from "./pages/ImageUpscale";
 import ImageDpi from "./pages/ImageDpi";
 import ImageMetadata from "./pages/ImageMetadata";
-
 function App() {
   return (
     <Routes>
