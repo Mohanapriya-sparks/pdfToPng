@@ -12,7 +12,10 @@ import ImageCompress from "./pages/ImageCompress";
 import ImageResize from "./pages/ImageResize";
 import ImageUpscale from "./pages/ImageUpscale";
 import ImageDpi from "./pages/ImageDpi";
+import ImageGrayScale from "./pages/ImageGrayScale";
 import ImageMetadata from "./pages/ImageMetadata";
+import ImageBase64 from "./pages/ImageBase64";
+
 function App() {
   return (
     <Routes>
@@ -25,6 +28,7 @@ function App() {
         <Route path="/pdf-to-word" element={<PdfDocx />} />
         <Route path="/image-to-webp" element={<ImageWebp />} />
         <Route path="/image-to-jpg" element={<ImageJpg />} />
+        <Route path="/image-to-grayscale" element={<ImageGrayScale />} />
         <Route path="/remove-bg" element={<RemoveBg />} />
         <Route path="/rotate-flip" element={<RotateFlip />} />
         <Route path="/image-compress" element={<ImageCompress />} />
@@ -32,6 +36,7 @@ function App() {
         <Route path="/image-upscale" element={<ImageUpscale />} />
         <Route path="/image-dpi" element={<ImageDpi />} />
         <Route path="/image-metadata" element={<ImageMetadata />} />
+        <Route path="/image-to-base64" element={<ImageBase64 />} />
       </Route>
     </Routes>
   );
