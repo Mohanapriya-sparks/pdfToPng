@@ -91,6 +91,15 @@ const tools = [
     iconGradient: "from-blue-500 to-indigo-500",
   },
   {
+    id: "image-ocr",
+    name: "Image OCR",
+    icon: <FileText />,
+    description: "Extract editable text from images using OCR.",
+    path: "/image-ocr",
+    gradient: "from-sky-500/10 to-cyan-500/10",
+    iconGradient: "from-sky-500 to-cyan-500",
+  },
+  {
   id: "image-watermark",
   name: "Image Watermark",
   icon: <Droplets />,
