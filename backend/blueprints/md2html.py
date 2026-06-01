@@ -1,15 +1,21 @@
-import traceback
-from io import BytesIO
+#!/usr/bin/env python3
+"""
+Markdown to HTML converter with built-in CSS themes.
+Usage:
+    python md2html.py input.md [-o output.html] [-t theme_name]
+    python md2html.py input.md --theme dark
+"""
 
-from flask import Blueprint, request
+import argparse
+import os
+import sys
 
-from utils.helpers import error, send_file_and_cleanup
-from .md2html import convert_md_to_html, THEMES, markdown2
+try:
+    import markdown2
+except ImportError:
+    markdown2 = None
 
-markdown_bp = Blueprint("markdown", __name__)
-
-# Themes and converter are imported from md2html.py, keeping shared logic in one place
-
+# Predefined themes as CSS strings
 THEMES = {
     "light": """
 /* Light Theme */
@@ -139,7 +145,7 @@ code {
     padding: 0.2em 0.4em;
     border-radius: 3px;
     font-family: 'Courier New', Courier, monospace;
-    color: #f8f8f2;
+    color: #f8f9f2;
 }
 pre {
     background-color: #1e1e1e;
@@ -151,7 +157,7 @@ pre {
 pre code {
     background: none;
     padding: 0;
-    color: #f8f8f2;
+    color: #f8f9f2;
 }
 table {
     border-collapse: collapse;
@@ -281,13 +287,8 @@ def convert_md_to_html(md_text, theme_name="light"):
     if markdown2 is None:
         raise RuntimeError("markdown2 module is not installed")
 
-    # Convert markdown to HTML
     html_content = markdown2.markdown(md_text, extras=["fenced-code-blocks", "tables"])
-
-    # Get theme CSS
     theme_css = THEMES.get(theme_name, THEMES["light"])
-
-    # Create full HTML document
     full_html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -305,58 +306,41 @@ def convert_md_to_html(md_text, theme_name="light"):
     return full_html
 
 
-@markdown_bp.route("/convertMdToHtml", methods=["POST"])
-def convert_md_to_html_endpoint():
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Convert Markdown to HTML with built-in CSS themes.")
+    parser.add_argument("input", help="Input Markdown file")
+    parser.add_argument("-o", "--output", help="Output HTML file (default: input file with .html extension)")
+    parser.add_argument("-t", "--theme", choices=THEMES.keys(), default="light",
+                        help="Theme to use (default: light)")
+
+    args = parser.parse_args()
+
     if markdown2 is None:
-        return error("markdown2 dependency is not installed on the server", 500)
+        print("Error: markdown2 module is required. Install it with: pip install markdown2")
+        sys.exit(1)
 
-    doc = None
+    if not os.path.isfile(args.input):
+        print(f"Error: Input file '{args.input}' not found.")
+        sys.exit(1)
+
     try:
-        if "file" not in request.files:
-            return error("No file provided")
-
-        md_file = request.files["file"]
-
-        if md_file.filename == "":
-            return error("No file selected")
-
-        # Optional: check if the file is a Markdown file by extension
-        if not md_file.filename.lower().endswith(".md"):
-            return error("Invalid file format. Please upload a Markdown (.md) file.")
-
-        # Read the Markdown content
-        md_content = md_file.read().decode("utf-8")
-
-        # Get optional parameters
-        output_filename = request.form.get("output_filename", "")
-        theme = request.form.get("theme", "light")
-
-        # Validate theme
-        if theme not in THEMES:
-            theme = "light"
-
-        # Convert to HTML
-        html_output = convert_md_to_html(md_content, theme)
-
-        # Determine output filename
-        if not output_filename:
-            # Remove .md extension and add .html
-            base = md_file.filename.rsplit(".", 1)[0] if md_file.filename.lower().endswith(".md") else md_file.filename
-            output_filename = base + ".html"
-        elif not output_filename.lower().endswith(".html"):
-            output_filename += ".html"
-
-        # Return the HTML as a downloadable file
-        return send_file_and_cleanup(
-            BytesIO(html_output.encode("utf-8")),
-            mimetype="text/html",
-            as_attachment=True,
-            download_name=output_filename,
-        )
-
-    except UnicodeDecodeError:
-        return error("Could not decode the file as UTF-8. Please ensure it is a valid Markdown file.")
+        with open(args.input, 'r', encoding='utf-8') as f:
+            md_content = f.read()
     except Exception as e:
-        # Log the error for debugging (optional)
-        # traceback.print_exc()
-        return error("An error occurred during Markdown to HTML conversion.")
+        print(f"Error reading input file: {e}")
+        sys.exit(1)
+
+    html_output = convert_md_to_html(md_content, args.theme)
+
+    if args.output:
+        output_file = args.output
+    else:
+        output_file = os.path.splitext(args.input)[0] + ".html"
+
+    try:
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(html_output)
+        print(f"Conversion complete: {args.input} -> {output_file} (theme: {args.theme})")
+    except Exception as e:
+        print(f"Error writing output file: {e}")
+        sys.exit(1)
