@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "../Sidebar/Sidebar";
-import { Menu } from "lucide-react";
+import { Menu, Home } from "lucide-react";
 
 const Layout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -42,8 +42,9 @@ const Layout = () => {
           <button
             onClick={() => navigate("/")}
             /* Lowered z-index to z-40 so the Sidebar can overlap it cleanly */
-            className="fixed top-4 right-4 z-40 px-5 py-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 font-medium flex items-center gap-2"
+            className="fixed top-4 right-4 z-40 flex items-center gap-2 rounded-lg bg-linear-to-r from-[#4361ee] to-[#3b82f6] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(59,130,246,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(59,130,246,0.35)]"
           >
+            <Home className="h-4 w-4" />
             <span>Home</span>
           </button>
         )}
