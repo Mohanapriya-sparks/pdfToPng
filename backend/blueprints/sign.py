@@ -41,7 +41,7 @@ def sign_pdf():
             return upload_error
 
         # Validate PDF extension
-        pdf_error = validate_pdf_file(filename)
+        pdf_error = validate_pdf_file(pdf_file, filename)
         if pdf_error:
             return pdf_error
 

@@ -69,7 +69,7 @@ def get_pdf_info():
         if upload_error:
             return upload_error
 
-        pdf_error = validate_pdf_file(filename)
+        pdf_error = validate_pdf_file(pdf_file, filename)
         if pdf_error:
             return pdf_error
 
